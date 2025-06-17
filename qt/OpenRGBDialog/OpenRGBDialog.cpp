@@ -104,6 +104,12 @@ static int GetIcon(device_type type)
     case DEVICE_TYPE_KEYPAD:
         icon = OpenRGBFont::keypad;
         break;
+    case DEVICE_TYPE_LAPTOP:
+        icon = OpenRGBFont::laptop;
+        break;
+    case DEVICE_TYPE_MONITOR:
+        icon = OpenRGBFont::monitor;
+        break;
     default:
         icon = OpenRGBFont::unknown;
         break;
@@ -489,6 +495,11 @@ OpenRGBDialog::OpenRGBDialog(QWidget *parent) : QMainWindow(parent), ui(new Open
     AddE131SettingsPage();
 
     /*-----------------------------------------------------*\
+    | Add the Govee settings page                           |
+    \*-----------------------------------------------------*/
+    AddGoveeSettingsPage();
+
+    /*-----------------------------------------------------*\
     | Add the Kasa Smart settings page                      |
     \*-----------------------------------------------------*/
     AddKasaSmartSettingsPage();
@@ -639,7 +650,7 @@ void OpenRGBDialog::closeEvent(QCloseEvent *event)
 {
     ResourceManager::get()->WaitForDeviceDetection();
 
-    if (IsMinimizeOnClose() && !this->isHidden())
+    if (IsMinimizeOnClose() && !this->isHidden() && event->spontaneous())
     {
 #ifdef __APPLE__
         MacUtils::ToggleApplicationDocklessState(false);
@@ -748,7 +759,7 @@ void OpenRGBDialog::AddSoftwareInfoPage()
     /*-----------------------------------------------------*\
     | Create the tab label                                  |
     \*-----------------------------------------------------*/
-    TabLabel* SoftwareTabLabel = new TabLabel(OpenRGBFont::info, tr("Software"), (char *)"Software", (char *)context);
+    TabLabel* SoftwareTabLabel = new TabLabel(OpenRGBFont::info, tr("About OpenRGB"), (char *)"About OpenRGB", (char *)context);
 
     ui->InformationTabBar->tabBar()->setTabButton(ui->InformationTabBar->tabBar()->count() - 1, QTabBar::LeftSide, SoftwareTabLabel);
 }
@@ -827,6 +838,23 @@ void OpenRGBDialog::AddE131SettingsPage()
     ui->SettingsTabBar->tabBar()->setTabButton(ui->SettingsTabBar->tabBar()->count() - 1, QTabBar::LeftSide, SettingsTabLabel);
 }
 
+void OpenRGBDialog::AddGoveeSettingsPage()
+{
+    /*-----------------------------------------------------*\
+    | Create the Settings page                              |
+    \*-----------------------------------------------------*/
+    GoveeSettingsPage = new OpenRGBGoveeSettingsPage();
+
+    ui->SettingsTabBar->addTab(GoveeSettingsPage, "");
+
+    /*-----------------------------------------------------*\
+    | Create the tab label                                  |
+    \*-----------------------------------------------------*/
+    TabLabel* SettingsTabLabel = new TabLabel(OpenRGBFont::bulb, tr("Govee Devices"), (char *)"Govee Devices", (char *)context);
+
+    ui->SettingsTabBar->tabBar()->setTabButton(ui->SettingsTabBar->tabBar()->count() - 1, QTabBar::LeftSide, SettingsTabLabel);
+}
+
 void OpenRGBDialog::AddKasaSmartSettingsPage()
 {
     /*-----------------------------------------------------*\
@@ -835,17 +863,6 @@ void OpenRGBDialog::AddKasaSmartSettingsPage()
     KasaSmartSettingsPage = new OpenRGBKasaSmartSettingsPage();
 
     ui->SettingsTabBar->addTab(KasaSmartSettingsPage, "");
-
-    QString SettingsLabelString;
-
-    if(OpenRGBThemeManager::IsDarkTheme())
-    {
-        SettingsLabelString = "light_dark.png";
-    }
-    else
-    {
-        SettingsLabelString = "light.png";
-    }
 
     /*-----------------------------------------------------*\
     | Create the tab label                                  |
@@ -1641,7 +1658,11 @@ void OpenRGBDialog::onShowDialogMessage()
 
     DontShowAgain = false;
 
-    QObject::connect(CheckBox_DontShowAgain, &QCheckBox::stateChanged, [this](int state)
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+        QObject::connect(CheckBox_DontShowAgain, &QCheckBox::checkStateChanged, [this](Qt::CheckState state)
+    #else
+        QObject::connect(CheckBox_DontShowAgain, &QCheckBox::stateChanged, [this](int state)
+    #endif
     {
         if(static_cast<Qt::CheckState>(state) == Qt::CheckState::Checked)
         {

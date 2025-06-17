@@ -9,21 +9,26 @@
 
 #pragma once
 
-#include <QDialog>
-#include "ui_OpenRGBElgatoKeyLightSettingsEntry.h"
+#include "BaseManualDeviceEntry.h"
 
 namespace Ui
 {
     class OpenRGBElgatoKeyLightSettingsEntry;
+    class OpenRGBElgatoKeyLightSettingsEntryUi;
 }
 
-class Ui::OpenRGBElgatoKeyLightSettingsEntry : public QDialog
+class Ui::OpenRGBElgatoKeyLightSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
 public:
     explicit OpenRGBElgatoKeyLightSettingsEntry(QWidget *parent = nullptr);
     ~OpenRGBElgatoKeyLightSettingsEntry();
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+
+private:
     Ui::OpenRGBElgatoKeyLightSettingsEntryUi *ui;
 
 private slots:

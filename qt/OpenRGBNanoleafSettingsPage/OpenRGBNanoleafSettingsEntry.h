@@ -9,16 +9,17 @@
 
 #pragma once
 
-#include <QWidget>
+#include "BaseManualDeviceEntry.h"
 #include "ui_OpenRGBNanoleafSettingsEntry.h"
 #include "OpenRGBNanoleafScanningThread.h"
 
 namespace Ui
 {
     class OpenRGBNanoleafSettingsEntry;
+    class OpenRGBNanoleafSettingsEntryUi;
 }
 
-class Ui::OpenRGBNanoleafSettingsEntry : public QWidget
+class Ui::OpenRGBNanoleafSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
@@ -26,9 +27,15 @@ public:
     explicit OpenRGBNanoleafSettingsEntry(QWidget *parent = nullptr);
     OpenRGBNanoleafSettingsEntry(QString a_address, int a_port);
     ~OpenRGBNanoleafSettingsEntry();
-    Ui::OpenRGBNanoleafSettingsEntryUi *ui;
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+
     QString address;
     int port;
+
+private:
+    Ui::OpenRGBNanoleafSettingsEntryUi *ui;
 
 private slots:
     void changeEvent(QEvent *event);

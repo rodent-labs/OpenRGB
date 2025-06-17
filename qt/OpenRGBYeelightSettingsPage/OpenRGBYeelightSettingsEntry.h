@@ -9,21 +9,26 @@
 
 #pragma once
 
-#include <QWidget>
-#include "ui_OpenRGBYeelightSettingsEntry.h"
+#include "BaseManualDeviceEntry.h"
 
 namespace Ui
 {
     class OpenRGBYeelightSettingsEntry;
+    class OpenRGBYeelightSettingsEntryUi;
 }
 
-class Ui::OpenRGBYeelightSettingsEntry : public QWidget
+class Ui::OpenRGBYeelightSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
 public:
     explicit OpenRGBYeelightSettingsEntry(QWidget *parent = nullptr);
     ~OpenRGBYeelightSettingsEntry();
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+
+private:
     Ui::OpenRGBYeelightSettingsEntryUi *ui;
 
 private slots:

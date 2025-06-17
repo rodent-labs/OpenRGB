@@ -7,21 +7,27 @@
 |   SPDX-License-Identifier: GPL-2.0-only                   |
 \*---------------------------------------------------------*/
 
-#include <QWidget>
-#include "ui_OpenRGBLIFXSettingsEntry.h"
+#include "BaseManualDeviceEntry.h"
 
 namespace Ui
 {
     class OpenRGBLIFXSettingsEntry;
+    class OpenRGBLIFXSettingsEntryUi;
 }
 
-class Ui::OpenRGBLIFXSettingsEntry : public QWidget
+class Ui::OpenRGBLIFXSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
 public:
     explicit OpenRGBLIFXSettingsEntry(QWidget *parent = nullptr);
     ~OpenRGBLIFXSettingsEntry();
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+    void setName(QString name);
+
+private:
     Ui::OpenRGBLIFXSettingsEntryUi *ui;
 
 private slots:

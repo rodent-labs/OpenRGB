@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include <QWidget>
-#include "ui_OpenRGBSerialSettingsEntry.h"
+#include "BaseManualDeviceEntry.h"
 
 namespace Ui
 {
     class OpenRGBSerialSettingsEntry;
+    class OpenRGBSerialSettingsEntryUi;
 }
 
-class Ui::OpenRGBSerialSettingsEntry : public QWidget
+class Ui::OpenRGBSerialSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
@@ -29,5 +29,10 @@ private slots:
 public:
     explicit OpenRGBSerialSettingsEntry(QWidget *parent = nullptr);
     ~OpenRGBSerialSettingsEntry();
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+
+private:
     Ui::OpenRGBSerialSettingsEntryUi *ui;
 };

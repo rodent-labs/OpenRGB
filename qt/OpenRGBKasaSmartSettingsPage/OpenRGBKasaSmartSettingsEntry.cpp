@@ -13,7 +13,7 @@
 using namespace Ui;
 
 OpenRGBKasaSmartSettingsEntry::OpenRGBKasaSmartSettingsEntry(QWidget *parent) :
-    QWidget(parent),
+    BaseManualDeviceEntry(parent),
     ui(new Ui::OpenRGBKasaSmartSettingsEntryUi)
 {
     ui->setupUi(this);
@@ -30,4 +30,34 @@ void OpenRGBKasaSmartSettingsEntry::changeEvent(QEvent *event)
     {
         ui->retranslateUi(this);
     }
+}
+
+void OpenRGBKasaSmartSettingsEntry::loadFromSettings(const json& data)
+{
+    if(data.contains("ip"))
+    {
+        ui->IPEdit->setText(QString::fromStdString(data["ip"]));
+    }
+    if(data.contains("name"))
+    {
+        ui->NameEdit->setText(QString::fromStdString(data["name"]));
+    }
+}
+
+json OpenRGBKasaSmartSettingsEntry::saveSettings()
+{
+    json result;
+    result["ip"] = ui->IPEdit->text().toStdString();
+    result["name"] = ui->NameEdit->text().toStdString();
+    return result;
+}
+
+const char* OpenRGBKasaSmartSettingsEntry::settingsSection()
+{
+    return "KasaSmartDevices";
+}
+
+void OpenRGBKasaSmartSettingsEntry::setName(QString name)
+{
+    ui->NameEdit->setText(name);
 }

@@ -13,7 +13,7 @@
 using namespace Ui;
 
 OpenRGBPhilipsWizSettingsEntry::OpenRGBPhilipsWizSettingsEntry(QWidget *parent) :
-    QWidget(parent),
+    BaseManualDeviceEntry(parent),
     ui(new Ui::OpenRGBPhilipsWizSettingsEntryUi)
 {
     ui->setupUi(this);
@@ -33,4 +33,46 @@ void OpenRGBPhilipsWizSettingsEntry::changeEvent(QEvent *event)
     {
         ui->retranslateUi(this);
     }
+}
+
+void OpenRGBPhilipsWizSettingsEntry::loadFromSettings(const json& data)
+{
+    if(data.contains("ip"))
+    {
+        ui->IPEdit->setText(QString::fromStdString(data["ip"]));
+    }
+
+    if(data.contains("use_cool_white"))
+    {
+        ui->UseCoolWhiteCheckBox->setChecked(data["use_cool_white"]);
+    }
+
+    if(data.contains("use_warm_white"))
+    {
+        ui->UseWarmWhiteCheckBox->setChecked(data["use_warm_white"]);
+    }
+
+    if(data.contains("selected_white_strategy"))
+    {
+        ui->WhiteStrategyComboBox->setCurrentText(QString::fromStdString(data["selected_white_strategy"]));
+    }
+}
+
+json OpenRGBPhilipsWizSettingsEntry::saveSettings()
+{
+    json result;
+    /*-------------------------------------------------*\
+    | Required parameters                               |
+    \*-------------------------------------------------*/
+    result["ip"]               = ui->IPEdit->text().toStdString();
+    result["use_cool_white"]   = ui->UseCoolWhiteCheckBox->isChecked();
+    result["use_warm_white"]   = ui->UseWarmWhiteCheckBox->isChecked();
+    result["selected_white_strategy"]   = ui->WhiteStrategyComboBox->currentText().toStdString();
+
+    return result;
+}
+
+const char* OpenRGBPhilipsWizSettingsEntry::settingsSection()
+{
+    return "PhilipsWizDevices";
 }

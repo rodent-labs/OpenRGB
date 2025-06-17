@@ -65,6 +65,7 @@ message("VERSION_DEB: "$$VERSION_DEB)
 message("VERSION_WIX: "$$VERSION_WIX)
 message("VERSION_AUR: "$$VERSION_AUR)
 message("VERSION_RPM: "$$VERSION_RPM)
+message("QT_VERSION:  "$$QT_VERSION)
 #-----------------------------------------------------------------------------------------------#
 # Automatically generated build information                                                     #
 #-----------------------------------------------------------------------------------------------#
@@ -299,6 +300,7 @@ unix {
 #       to add new translations relies on entries here in OpenRGB.pro                           #
 #-----------------------------------------------------------------------------------------------#
 TRANSLATIONS +=                                                                                 \
+    qt/i18n/OpenRGB_be_BY.ts                                                                    \
     qt/i18n/OpenRGB_de_DE.ts                                                                    \
     qt/i18n/OpenRGB_el_GR.ts                                                                    \
     qt/i18n/OpenRGB_en_US.ts                                                                    \
@@ -311,9 +313,11 @@ TRANSLATIONS +=                                                                 
     qt/i18n/OpenRGB_ja_JP.ts                                                                    \
     qt/i18n/OpenRGB_ko_KR.ts                                                                    \
     qt/i18n/OpenRGB_ms_MY.ts                                                                    \
+    qt/i18n/OpenRGB_nb_NO.ts                                                                    \
     qt/i18n/OpenRGB_pl_PL.ts                                                                    \
     qt/i18n/OpenRGB_pt_BR.ts                                                                    \
     qt/i18n/OpenRGB_ru_RU.ts                                                                    \
+    qt/i18n/OpenRGB_uk_UA.ts                                                                    \
     qt/i18n/OpenRGB_zh_CN.ts                                                                    \
     qt/i18n/OpenRGB_zh_TW.ts                                                                    \
 

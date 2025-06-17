@@ -9,21 +9,27 @@
 
 #pragma once
 
-#include <QWidget>
-#include "ui_OpenRGBKasaSmartSettingsEntry.h"
+#include "BaseManualDeviceEntry.h"
 
 namespace Ui
 {
     class OpenRGBKasaSmartSettingsEntry;
+    class OpenRGBKasaSmartSettingsEntryUi;
 }
 
-class Ui::OpenRGBKasaSmartSettingsEntry : public QWidget
+class Ui::OpenRGBKasaSmartSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
 public:
     explicit OpenRGBKasaSmartSettingsEntry(QWidget *parent = nullptr);
     ~OpenRGBKasaSmartSettingsEntry();
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+    void setName(QString name);
+
+private:
     Ui::OpenRGBKasaSmartSettingsEntryUi *ui;
 
 private slots:

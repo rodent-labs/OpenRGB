@@ -11,6 +11,9 @@
 #include "OpenRGBPluginInterface.h"
 #include "NetworkProtocol.h"
 
+#include "ui_OpenRGBSoftwareInfoPage.h"
+#include <QSysInfo>
+
 using namespace Ui;
 
 OpenRGBSoftwareInfoPage::OpenRGBSoftwareInfoPage(QWidget *parent) :
@@ -20,11 +23,13 @@ OpenRGBSoftwareInfoPage::OpenRGBSoftwareInfoPage(QWidget *parent) :
     ui->setupUi(this);
     ui->SDKVersionValue->setText(QString::number(OPENRGB_SDK_PROTOCOL_VERSION));
     ui->PluginAPIVersionValue->setText(QString::number(OPENRGB_PLUGIN_API_VERSION));
+    ui->QtVersionValue->setText(QT_VERSION_STR);
     ui->VersionValue->setText(VERSION_STRING);
     ui->BuildDateValue->setText(BUILDDATE_STRING);
     ui->GitCommitIDValue->setText(GIT_COMMIT_ID);
     ui->GitCommitDateValue->setText(GIT_COMMIT_DATE);
     ui->GitBranchValue->setText(GIT_BRANCH);
+    ui->OsVersionValue->setText(QSysInfo::prettyProductName());
 }
 
 OpenRGBSoftwareInfoPage::~OpenRGBSoftwareInfoPage()

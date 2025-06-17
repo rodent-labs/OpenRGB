@@ -9,21 +9,26 @@
 
 #pragma once
 
-#include <QWidget>
-#include "ui_OpenRGBPhilipsWizSettingsEntry.h"
+#include "BaseManualDeviceEntry.h"
 
 namespace Ui
 {
     class OpenRGBPhilipsWizSettingsEntry;
+    class OpenRGBPhilipsWizSettingsEntryUi;
 }
 
-class Ui::OpenRGBPhilipsWizSettingsEntry : public QWidget
+class Ui::OpenRGBPhilipsWizSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
 public:
     explicit OpenRGBPhilipsWizSettingsEntry(QWidget *parent = nullptr);
     ~OpenRGBPhilipsWizSettingsEntry();
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+
+private:
     Ui::OpenRGBPhilipsWizSettingsEntryUi *ui;
 
 private slots:

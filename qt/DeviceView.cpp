@@ -228,6 +228,7 @@ static const std::map<std::string, led_label> led_label_lookup =
     { KEY_ES_OPEN_QUESTION_MARK,{ "¿"     , "¡"                 }},
     { KEY_ES_TILDE,             { "´"     , "¨"                 }},
     { KEY_ES_ENIE,              { "ñ"     , "Ñ"                 }},
+    { KEY_BR_TILDE,             { "~"     , "~"                 }} 
 };
 
 void DeviceView::setController(RGBController * controller_ptr)
@@ -596,10 +597,17 @@ void DeviceView::mousePressEvent(QMouseEvent *event)
         /*-----------------------------------------------------*\
         | It's okay if the size becomes negative                |
         \*-----------------------------------------------------*/
-        selectionRect.setLeft(event->x());
-        selectionRect.setTop(event->y());
-        selectionRect.setRight(event->x());
-        selectionRect.setBottom(event->y());
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            selectionRect.setLeft(event->position().x());
+            selectionRect.setTop(event->position().y());
+            selectionRect.setRight(event->position().x());
+            selectionRect.setBottom(event->position().y());
+        #else
+            selectionRect.setLeft(event->x());
+            selectionRect.setTop(event->y());
+            selectionRect.setRight(event->x());
+            selectionRect.setBottom(event->y());
+        #endif
 
         updateSelection();
         update();
@@ -611,8 +619,14 @@ void DeviceView::mouseMoveEvent(QMouseEvent *event)
     if(per_led)
     {
         lastMousePos = event->pos();
-        selectionRect.setRight(event->x());
-        selectionRect.setBottom(event->y());
+
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            selectionRect.setRight(event->position().x());
+            selectionRect.setBottom(event->position().y());
+        #else
+            selectionRect.setRight(event->x());
+            selectionRect.setBottom(event->y());
+        #endif
 
         if(mouseDown)
         {

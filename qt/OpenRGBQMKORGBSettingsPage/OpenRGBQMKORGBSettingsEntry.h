@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include <QWidget>
-#include "ui_OpenRGBQMKORGBSettingsEntry.h"
+#include "BaseManualDeviceEntry.h"
 
 namespace Ui
 {
     class OpenRGBQMKORGBSettingsEntry;
+    class OpenRGBQMKORGBSettingsEntryUi;
 }
 
-class Ui::OpenRGBQMKORGBSettingsEntry : public QWidget
+class Ui::OpenRGBQMKORGBSettingsEntry : public BaseManualDeviceEntry
 {
     Q_OBJECT
 
@@ -27,5 +27,10 @@ private slots:
 public:
     explicit OpenRGBQMKORGBSettingsEntry(QWidget *parent = nullptr);
     ~OpenRGBQMKORGBSettingsEntry();
+    void loadFromSettings(const json& data);
+    json saveSettings();
+    const char* settingsSection();
+
+private:
     Ui::OpenRGBQMKORGBSettingsEntryUi *ui;
 };

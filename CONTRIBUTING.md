@@ -67,3 +67,8 @@ OpenRGB is written in C++, uses the Qt framework for UI, and uses the QMake buil
 | This is a comment                |
 \*_-------------------------------*/
 ```
+
+## Translating
+
+Translation files are located in [`OpenRGB/qt/i18n/`](https://gitlab.com/CalcProgrammer1/OpenRGB/-/tree/master/qt/i18n), where languages are formatted using ISO 639-1 format: `OpenRGB_xx_XX.ts` — `xx_XX` representing the language code.
+In order to translate a file, you need to [fork](https://gitlab.com/CalcProgrammer1/OpenRGB/-/forks/new) the project, create a new file for your language with `lupdate` (or edit an exisiting one), edit the file with `qtlinguist`, commit, push, and create a merge request.

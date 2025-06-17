@@ -31,11 +31,15 @@ io_connect_t macUSPCIO_driver_connection;
 #include "macutils.h"
 #endif
 
+#ifdef __linux__
+#include <csignal>
+#endif
+
 using namespace std::chrono_literals;
 
 /******************************************************************************************\
 *                                                                                          *
-*   InitializeTimerResolution (Win32)                                                      *
+*   InitializeTimerResolutionThreadFunction (Win32)                                        *
 *                                                                                          *
 *       On Windows, the default timer resolution is 15.6ms.  For higher accuracy delays,   *
 *       the timer resolution should be set to a shorter interval.  The shortest interval   *
@@ -43,27 +47,43 @@ using namespace std::chrono_literals;
 *                                                                                          *
 \******************************************************************************************/
 #ifdef _WIN32
-typedef unsigned int NTSTATUS;
-typedef NTSTATUS (*NTSETTIMERRESOLUTION)(ULONG DesiredResolution, BOOLEAN SetResolution, PULONG CurrentResolution);
-
-void InitializeTimerResolution()
-{
-    NTSETTIMERRESOLUTION NtSetTimerResolution;
-    HMODULE              NtDllHandle;
-    ULONG                CurrentResolution;
-
-    NtDllHandle = LoadLibrary("ntdll.dll");
-
-    NtSetTimerResolution = (NTSETTIMERRESOLUTION)GetProcAddress(NtDllHandle, "NtSetTimerResolution");
-
-    NtSetTimerResolution(5000, TRUE, &CurrentResolution);
-}
-
 void InitializeTimerResolutionThreadFunction()
 {
+    /*-----------------------------------------------------*\
+    | NtSetTimerResolution function pointer type            |
+    \*-----------------------------------------------------*/
+    typedef unsigned int NTSTATUS;
+    typedef NTSTATUS (*NTSETTIMERRESOLUTION)(ULONG DesiredResolution, BOOLEAN SetResolution, PULONG CurrentResolution);
+
+    /*-----------------------------------------------------*\
+    | PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION = 4, |
+    | isn't defined in Win10 headers                        |
+    \*-----------------------------------------------------*/
+    PROCESS_POWER_THROTTLING_STATE PowerThrottlingState { PROCESS_POWER_THROTTLING_CURRENT_VERSION, 4, 0 };
+
+    ULONG                CurrentResolution;
+    HMODULE              NtDllHandle;
+    NTSETTIMERRESOLUTION NtSetTimerResolution;
+
+    /*-----------------------------------------------------*\
+    | Load ntdll.dll and get pointer to NtSetTimerResolution|
+    \*-----------------------------------------------------*/
+    NtDllHandle             = LoadLibrary("ntdll.dll");
+    NtSetTimerResolution    = (NTSETTIMERRESOLUTION)GetProcAddress(NtDllHandle, "NtSetTimerResolution");
+
+    /*-----------------------------------------------------*\
+    | Windows 11 requires                                   |
+    | PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION      |
+    \*-----------------------------------------------------*/
+    SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &PowerThrottlingState, sizeof(PowerThrottlingState));
+
+    /*-----------------------------------------------------*\
+    | Call NtSetTimerResolution to set timer resolution to  |
+    | 0.5ms every 500ms                                     |
+    \*-----------------------------------------------------*/
     while(1)
     {
-        InitializeTimerResolution();
+        NtSetTimerResolution(5000, TRUE, &CurrentResolution);
 
         std::this_thread::sleep_for(500ms);
     }
@@ -154,6 +174,19 @@ void InstallWinRing0()
 
 /******************************************************************************************\
 *                                                                                          *
+*   Linux signal handler                                                                   *
+*                                                                                          *
+\******************************************************************************************/
+#ifdef __linux__
+void sigHandler(int s)
+{
+    std::signal(s, SIG_DFL);
+    qApp->quit();
+}
+#endif
+
+/******************************************************************************************\
+*                                                                                          *
 *   main                                                                                   *
 *                                                                                          *
 *       Main function.  Detects busses and Aura controllers, then opens the main window    *
@@ -162,6 +195,7 @@ void InstallWinRing0()
 
 int main(int argc, char* argv[])
 {
+    int exitval = EXIT_SUCCESS;
 #ifdef _WIN32
     /*---------------------------------------------------------*\
     | Windows only - Attach console output                      |
@@ -216,7 +250,22 @@ int main(int argc, char* argv[])
     if(ret_flags & RET_FLAG_START_GUI)
     {
         LOG_TRACE("[main] initializing GUI");
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+        /*-----------------------------------------------------*\
+        | Enable high DPI scaling support                       |
+        \*-----------------------------------------------------*/
+        #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps,    true);
+            QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+        #endif
+
+        /*-----------------------------------------------------*\
+        | Enable high DPI fractional scaling support on Windows |
+        \*-----------------------------------------------------*/
+        #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0) && defined(Q_OS_WIN)
+            QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+        #endif
+
         QApplication a(argc, argv);
         QGuiApplication::setDesktopFileName("org.openrgb.OpenRGB");
         LOG_TRACE("[main] QApplication created");
@@ -256,7 +305,11 @@ int main(int argc, char* argv[])
         }
 
         LOG_TRACE("[main] Ready to exec() the dialog");
-        return a.exec();
+#ifdef __linux__
+        std::signal(SIGINT,  sigHandler);
+        std::signal(SIGTERM, sigHandler);
+#endif
+        exitval = a.exec();
     }
     else
     {
@@ -273,25 +326,18 @@ int main(int argc, char* argv[])
 
             if(!server->GetOnline())
             {
-#ifdef _MACOSX_X86_X64
-                CloseMacUSPCIODriver();
-#endif
-                return 1;
+                exitval = EXIT_FAILURE;
             }
             else
             {
                 WaitWhileServerOnline(server);
-#ifdef _MACOSX_X86_X64
-                CloseMacUSPCIODriver();
-#endif
             }
         }
-        else
-        {
-#ifdef _MACOSX_X86_X64
-            CloseMacUSPCIODriver();
-#endif
-            return 0;
-        }
     }
+    ResourceManager::get()->Cleanup();
+#ifdef _MACOSX_X86_X64
+    CloseMacUSPCIODriver();
+#endif
+    LOG_TRACE("OpenRGB finishing with exit code %d", exitval);
+    return exitval;
 }

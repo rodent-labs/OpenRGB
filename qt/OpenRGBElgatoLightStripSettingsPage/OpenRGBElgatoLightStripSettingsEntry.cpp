@@ -13,10 +13,11 @@
 using namespace Ui;
 
 OpenRGBElgatoLightStripSettingsEntry::OpenRGBElgatoLightStripSettingsEntry(QWidget *parent) :
-    QDialog(parent),
+    BaseManualDeviceEntry(parent),
     ui(new Ui::OpenRGBElgatoLightStripSettingsEntryUi)
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 }
 
 OpenRGBElgatoLightStripSettingsEntry::~OpenRGBElgatoLightStripSettingsEntry()
@@ -30,4 +31,24 @@ void OpenRGBElgatoLightStripSettingsEntry::changeEvent(QEvent *event)
     {
         ui->retranslateUi(this);
     }
+}
+
+void OpenRGBElgatoLightStripSettingsEntry::loadFromSettings(const json& data)
+{
+    if(data.contains("ip"))
+    {
+        ui->IPEdit->setText(QString::fromStdString(data["ip"]));
+    }
+}
+
+json OpenRGBElgatoLightStripSettingsEntry::saveSettings()
+{
+    json result;
+    result["ip"] = ui->IPEdit->text().toStdString();
+    return result;
+}
+
+const char* OpenRGBElgatoLightStripSettingsEntry::settingsSection()
+{
+    return "ElgatoLightStripDevices";
 }
